@@ -163,6 +163,31 @@ def depthFirstSearch(problem):
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
+    start = problem.getStartState()
+    q = util.Queue()
+    visited = []
+    q.push(start)
+    #create dictionaries that can store pacman's movement
+    parentPath = {}
+    pastMoves = {}
+
+    #checking if goal is already met before entering loop
+    if problem.isGoalState(start):
+        return visited
+
+    while not q.isEmpty():
+        curr = q.pop()
+        visited.append(curr)
+        for (nxtMove, direction, cost) in problem.getSuccessors(curr):
+            if nxtMove not in visited:
+                #q.append(nxtMove)
+                visited.append(nxtMove)
+                #record path and direction taken
+                parentPath[nxtMove] = curr
+                pastMoves[nxtMove] = direction
+                if problem.isGoalState(nxtMove):
+                    return getPath(nxtMove, parentPath, pastMoves)
+                q.push(nxtMove)
     util.raiseNotDefined()
 
 def uniformCostSearch(problem):
