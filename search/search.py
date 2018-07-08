@@ -193,6 +193,38 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
+
+    #print "Start:", problem.getStartState()
+    #print "Is the start a goal?", problem.isGoalState(problem.getStartState())
+    #print "Start's successors:", problem.getSuccessors(problem.getStartState())
+    start = problem.getStartState()
+    fringe = util.PriorityQueue()
+    visited = []
+
+    #create dictionaries that can record pacman's movement
+    parentPath = {}
+    pastMoves = {}
+
+    #no path to return
+    if problem.isGoalState(start):
+        return visited
+
+    fringe.push(start, 0)
+    while not fringe.isEmpty():
+        curr = fringe.pop()
+        visited.append(curr)
+        #same concept as earlier methods
+        for (nxtMove, direction, cost) in problem.getSuccessors(curr):
+            if nxtMove not in visited:
+                visited.append(nxtMove)
+                parentPath[nxtMove] = curr
+                pastMoves[nxtMove] = direction
+                if problem.isGoalState(nxtMove):
+                    return getPath(nxtMove, parentPath, pastMoves)
+                #check if nxtMove already exists, if it does,
+                #update it with new priority
+                fringe.update(nxtMove, cost)
+    #the search failed. raise undefined
     util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
