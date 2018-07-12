@@ -126,36 +126,35 @@ def depthFirstSearch(problem):
     Is the start a goal? False
     Start's successors: [((5, 4), 'South', 1), ((4, 5), 'West', 1)]
     """
-
     start = problem.getStartState()
-    mazeFringe = util.Stack()
     #track visited nodes in maze
     visited = []
-    #util.Stack push(self,item), pushes the 'item' to mazeFringe
-    mazeFringe.push(start)
+    #stop if already at goal, there's nothing to return
+    if problem.isGoalState(start):
+        return visited
+
+    #util.Stack push(self,item), pushes the 'item' to fringe/exploring
+    exploring = util.Stack()
+    exploring.push(start)
 
     #create dictionaries that can store pacman's movement
     parentPath = {}
     pastMoves = {}
 
-    #stop if already at goal, there's nothing to return
-    if problem.isGoalState(start):
-        return visited
-
-    while not mazeFringe.isEmpty():
+    while not exploring.isEmpty():
         #need to know the current state and next move of agent
-        currLocation = mazeFringe.pop()
+        curr = exploring.pop()
         #add visited nodes in maze to visited
-        visited.append(currLocation)
-        for (nxtMove, direction, cost) in problem.getSuccessors(currLocation):
+        visited.append(curr)
+        for (nxtMove, direction, cost) in problem.getSuccessors(curr):
             if nxtMove not in visited:
                 visited.append(nxtMove)
                 #record path and direction taken
-                parentPath[nxtMove] = currLocation
+                parentPath[nxtMove] = curr
                 pastMoves[nxtMove] = direction
                 if problem.isGoalState(nxtMove):
                     return getPath(nxtMove, parentPath, pastMoves)
-                mazeFringe.push(nxtMove)
+                exploring.push(nxtMove)
 
     #the search failed, return undefined
     util.raiseNotDefined()
@@ -164,19 +163,19 @@ def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
     start = problem.getStartState()
-    q = util.Queue()
     visited = []
-    q.push(start)
-    #create dictionaries that can store pacman's movement
-    parentPath = {}
-    pastMoves = {}
-
     #checking if goal is already met before entering loop
     if problem.isGoalState(start):
         return visited
 
-    while not q.isEmpty():
-        curr = q.pop()
+    exploring = util.Queue()
+    exploring.push(start)
+    #create dictionaries that can store pacman's movement
+    parentPath = {}
+    pastMoves = {}
+
+    while not exploring.isEmpty():
+        curr = exploring.pop()
         visited.append(curr)
         for (nxtMove, direction, cost) in problem.getSuccessors(curr):
             if nxtMove not in visited:
@@ -187,7 +186,8 @@ def breadthFirstSearch(problem):
                 pastMoves[nxtMove] = direction
                 if problem.isGoalState(nxtMove):
                     return getPath(nxtMove, parentPath, pastMoves)
-                q.push(nxtMove)
+                exploring.push(nxtMove)
+
     util.raiseNotDefined()
 
 def uniformCostSearch(problem):
@@ -198,20 +198,19 @@ def uniformCostSearch(problem):
     #print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     #print "Start's successors:", problem.getSuccessors(problem.getStartState())
     start = problem.getStartState()
-    fringe = util.PriorityQueue()
     visited = []
-
-    #create dictionaries that can record pacman's movement
-    parentPath = {}
-    pastMoves = {}
-
     #no path to return
     if problem.isGoalState(start):
         return visited
 
-    fringe.push(start, 0)
-    while not fringe.isEmpty():
-        curr = fringe.pop()
+    exploring = util.PriorityQueue()
+    #create dictionaries that can record pacman's movement
+    parentPath = {}
+    pastMoves = {}
+
+    exploring.push(start, 0)
+    while not exploring.isEmpty():
+        curr = exploring.pop()
         visited.append(curr)
         #same concept as earlier methods
         for (nxtMove, direction, cost) in problem.getSuccessors(curr):
@@ -223,7 +222,7 @@ def uniformCostSearch(problem):
                     return getPath(nxtMove, parentPath, pastMoves)
                 #check if nxtMove already exists, if it does,
                 #update it with new priority
-                fringe.update(nxtMove, cost)
+                exploring.update(nxtMove, cost)
     #the search failed. raise undefined
     util.raiseNotDefined()
 
@@ -237,6 +236,38 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+    visited = []
+    start = problem.getStartState()
+    #no path to return
+    if problem.isGoalState(start):
+        return visited
+    #create dictionaries that can record pacman's movement
+    parentPath = {}
+    pastMoves = {}
+
+    #priority queue with start aka OPEN set
+    exploring = util.PriorityQueue()
+    exploring.push(start, 0)
+
+    #start expanding nodes!
+    while not exploring.isEmpty():
+        curr = exploring.pop()
+        visited.append(curr)
+
+        for (nxtMove, direction, cost) in problem.getSuccessors(curr):
+            if nxtMove not in visited:
+                visited.append(nxtMove)
+                parentPath[nxtMove] = curr
+                pastMoves[nxtMove] = direction
+                #update heuristic
+                heur = heuristic(nxtMove, problem)
+                if problem.isGoalState(nxtMove):
+                    return getPath(nxtMove, parentPath, pastMoves)
+                #check if nxtMove already exists, if it does,
+                #update it with new priority
+                exploring.update(nxtMove, cost + heur)
+
+    #search failed, raise not defined
     util.raiseNotDefined()
 
 
